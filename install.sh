@@ -12,7 +12,7 @@ sudo mv squashfs-root/usr/bin/nvim /usr/bin/nvim
 sudo mkdir -p /usr/share/nvim
 sudo cp -r squashfs-root/usr/share/nvim/* /usr/share/nvim/
 rm -rf squashfs-root
-mkdir -p ~/.config/nvim/init.lua
+mkdir -p ~/.config/nvim
 cp ./nvim.lua ~/.config/nvim/init.lua
 
 # Set up oh-my-posh
