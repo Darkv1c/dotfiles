@@ -12,8 +12,8 @@ mv ./squashfs-root/usr/bin/nvim /usr/bin/nvim
 
 # Set up oh-my-posh
 curl -s https://ohmyposh.dev/install.sh | bash -s
-oh-my-posh font install Hack
-sudo cp ./Hack*.ttf /usr/share/fonts/
+#oh-my-posh font install Hack
+#sudo cp ./Hack*.ttf /usr/share/fonts/
 mkdir -p ~/.poshthemes
 wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/themes.zip -O ~/.poshthemes/themes.zip
 unzip ~/.poshthemes/themes.zip -d ~/.poshthemes
