@@ -1,4 +1,4 @@
-#!/bin/bash
+o#!/bin/bash
 
 # Fix terminal type
 export TERM=xterm-256color
@@ -19,5 +19,5 @@ wget https://github.com/JanDeDobbeleer/oh-my-posh/releases/latest/download/theme
 unzip ~/.poshthemes/themes.zip -d ~/.poshthemes
 chmod u+rw ~/.poshthemes/*.json
 rm ~/.poshthemes/themes.zip
-eval "$(oh-my-posh init bash --config ~/.poshthemes/jblab_2021.omp.json)"
+echo "eval \"$(oh-my-posh init bash --config ~/.poshthemes/jblab_2021.omp.json)\"" >> ~/.bashrc
 
