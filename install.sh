@@ -8,4 +8,4 @@ echo 'export TERM=xterm-256color' >> ~/.bashrc
 sudo apt-get update
 sudo apt-get upgrade
 
-sudo apt install neovim
+yes | sudo apt install neovim
