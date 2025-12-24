@@ -6,19 +6,15 @@ export TERM=xterm-256color
 echo 'export TERM=xterm-256color' >> ~/.bashrc
 
 # Install nvim from AppImage
-curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim.appimage
-chmod +x nvim.appimage
+curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
+chmod u+x nvim-linux-x86_64.appimage
 
 # Extract AppImage
-./nvim.appimage --appimage-extract
+./nvim-linux-x86_64.appimage --appimage-extract
 
-# Copy extracted files
-cp squashfs-root/usr/bin/nvim /usr/local/bin/nvim
-mkdir -p /usr/local/share
-cp -r squashfs-root/usr/share/nvim /usr/local/share/
-
-# Clean up
-rm -rf squashfs-root nvim.appimage
+# Exposing nvim globally.
+sudo mv squashfs-root /
+sudo ln -s /squashfs-root/AppRun /usr/bin/nvim
 
 # User config (sin sudo)
 mkdir -p ~/.config/nvim
