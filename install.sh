@@ -31,4 +31,5 @@ sudo apt-get update
 curl -fsSL https://opencode.ai/install | bash
 sudo apt-get install -y procps
 sudo apt-get install -y lsof
+mkdir -p ~/.config/opencode
 cp ./opencode.json ~/.config/opencode/opencode.json
