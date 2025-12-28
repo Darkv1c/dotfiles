@@ -1,4 +1,4 @@
-- [[ Leader Key ]]
+-- [[ Leader Key ]]
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.relativenumber = true
