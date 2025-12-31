@@ -29,7 +29,23 @@ return {
 				},
 			})
 
-			-- Keymap para previsualizar documento Quarto
+			-- Configure YAML indentation for QMD files
+			vim.api.nvim_create_autocmd("FileType", {
+				pattern = "quarto",
+				callback = function()
+					-- Specific configuration for YAML
+					vim.bo.tabstop = 2
+					vim.bo.shiftwidth = 2
+					vim.bo.softtabstop = 2
+					vim.bo.expandtab = true
+					vim.bo.indentexpr = ""
+					vim.bo.cindent = false
+					vim.bo.smartindent = false
+					vim.bo.autoindent = true
+				end,
+			})
+
+			-- Keymap to preview Quarto document
 			vim.keymap.set("n", "<leader>qp", function()
 				require("quarto").quartoPreview({ args = "--port 3000" })
 			end, { desc = "Quarto Preview" })
