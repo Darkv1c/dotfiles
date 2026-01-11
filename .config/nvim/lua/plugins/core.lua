@@ -26,7 +26,7 @@ return {
 					path_display = { "filename_first" },
 					file_ignore_patterns = { "node_modules" },
 				},
-				pickers = {j
+				pickers = {
 					find_files = {
 						hidden = true,
 					},
