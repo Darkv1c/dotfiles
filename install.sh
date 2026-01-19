@@ -1,9 +1,17 @@
 #!/bin/bash
 set -e
 
-# Fix terminal type
-export TERM=xterm-256color
-echo 'export TERM=xterm-256color' >> ~/.bashrc
+# Update
+sudo apt-get update
+
+# Install zsh
+sudo apt-get install -y zsh
+
+# Install starship prompt
+curl -sS https://starship.rs/install.sh | sh -s -- -y
+
+# Set zsh as default shell
+chsh -s $(which zsh)
 
 # Install nvim from AppImage
 curl -LO https://github.com/neovim/neovim/releases/latest/download/nvim-linux-x86_64.appimage
@@ -23,16 +31,22 @@ cp ./.config/nvim/lua/plugins/core.lua ~/.config/nvim/lua/plugins/core.lua
 cp ./.config/nvim/lua/plugins/study.lua ~/.config/nvim/lua/plugins/study.lua
 cp ./.config/nvim/lua/plugins/work.lua ~/.config/nvim/lua/plugins/work.lua
 
-# Set up oh-my-posh
-curl -s https://ohmyposh.dev/install.sh | bash -s
-echo 'eval "$(oh-my-posh init bash --config $(find / -name "avit.omp.json" 2>/dev/null | head -1))"' >> ~/.bashrc
+# Zsh and Starship configuration
+cp ./.zshrc ~/.zshrc
+mkdir -p ~/.config
+cp ./.config/starship.toml ~/.config/starship.toml
 
-# Update
-sudo apt-get update
+# Install yazi (file manager)
+curl -LO https://github.com/sxyazi/yazi/releases/latest/download/yazi-x86_64-unknown-linux-gnu.tar.gz
+tar -xzf yazi-x86_64-unknown-linux-gnu.tar.gz
+sudo mv yazi-x86_64-unknown-linux-gnu/yazi /usr/local/bin/
+rm -rf yazi-x86_64-unknown-linux-gnu yazi-x86_64-unknown-linux-gnu.tar.gz
 
 # Install Open Code
 curl -fsSL https://opencode.ai/install | bash
-sudo apt-get install -y procps
-sudo apt-get install -y lsof
+sudo apt-get install -y procps lsof
 mkdir -p ~/.config/opencode
 cp ./opencode.json ~/.config/opencode/opencode.json
+
+echo "Installation complete! Please log out and log back in for zsh to take effect."
+echo "Or run: exec zsh"

@@ -1,0 +1,84 @@
+# Configuración de Starship - Estilo AVIT (similar a Oh My Posh)
+# Tema minimalista con path completo, git branch y hora
+
+# Formato del prompt - Similar al tema avit
+format = """
+$directory\
+$git_branch\
+$git_status\
+$status\
+$line_break\
+$character"""
+
+# Agregar hora al lado derecho
+right_format = """$time"""
+
+# Continuar en nueva línea
+[line_break]
+disabled = false
+
+# Carácter del prompt - símbolo azul como en avit
+[character]
+success_symbol = "[❯](bold #007ACC)"
+error_symbol = "[❯](bold #C94A16)"
+
+# Directorio actual - path completo en blanco
+[directory]
+style = "bold white"
+format = "[$path]($style) "
+truncation_length = 0
+truncate_to_repo = false
+
+# Rama de Git - amarillo dorado como en avit
+[git_branch]
+symbol = ""
+style = "#C2C206"
+format = "[$symbol$branch]($style) "
+
+# Estado de Git - mostrar indicadores simples
+[git_status]
+style = "#C2C206"
+format = "([$all_status$ahead_behind]($style) )"
+conflicted = "="
+ahead = "⇡${count}"
+behind = "⇣${count}"
+diverged = "⇕⇡${ahead_count}⇣${behind_count}"
+untracked = "?"
+stashed = "$"
+modified = "!"
+staged = "+"
+renamed = "»"
+deleted = "✘"
+
+# Estado de error - rojo como en avit
+[status]
+disabled = false
+style = "#C94A16"
+format = "[x$status ]($style)"
+
+# Hora actual - dorado
+[time]
+disabled = false
+time_format = "%H:%M:%S"
+style = "#C2C206"
+format = "[$time]($style)"
+
+# Indicador de root - amarillo como en avit
+[sudo]
+disabled = false
+style = "#B5B50D"
+format = "[⚡]($style) "
+
+# Usuario - solo mostrar cuando sea necesario
+[username]
+style_user = "bold white"
+style_root = "bold #B5B50D"
+format = "[$user]($style)"
+disabled = false
+show_always = false
+
+# Hostname - solo en SSH
+[hostname]
+ssh_only = true
+format = "[@$hostname](bold white) "
+disabled = false
