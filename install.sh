@@ -223,6 +223,15 @@ else
     fi
 fi
 
+# Install fd-find and ripgrep
+log_step "Installing fd-find and ripgrep"
+if command -v fd &> /dev/null && command -v rg &> /dev/null; then
+    log_warn "fd-find and ripgrep are already installed, skipping"
+else
+    sudo apt-get install -y fd-find ripgrep
+    log_info "fd-find and ripgrep installed successfully"
+fi
+
 # Ensure yazi is in PATH for desktop environments
 log_step "Setting up PATH for desktop environments"
 if command -v yazi &> /dev/null; then
@@ -278,12 +287,18 @@ else
 fi
 
 log_step "Setting up OpenCode configuration"
-mkdir -p "$ACTUAL_HOME/.config/opencode"
-if [ -f "$SCRIPT_DIR/opencode.json" ]; then
-    cp "$SCRIPT_DIR/opencode.json" "$ACTUAL_HOME/.config/opencode/opencode.json"
+mkdir -p "$ACTUAL_HOME/.config/opencode/themes"
+if [ -f "$SCRIPT_DIR/.config/opencode/opencode.json" ]; then
+    cp "$SCRIPT_DIR/.config/opencode/opencode.json" "$ACTUAL_HOME/.config/opencode/opencode.json"
     log_info "Copied opencode.json"
 else
     log_warn "opencode.json not found, skipping"
+fi
+if [ -f "$SCRIPT_DIR/.config/opencode/themes/transparent-gold-blue.json" ]; then
+    cp "$SCRIPT_DIR/.config/opencode/themes/transparent-gold-blue.json" "$ACTUAL_HOME/.config/opencode/themes/transparent-gold-blue.json"
+    log_info "Copied transparent-gold-blue theme"
+else
+    log_warn "transparent-gold-blue theme not found, skipping"
 fi
 
 # Fix permissions if running as root

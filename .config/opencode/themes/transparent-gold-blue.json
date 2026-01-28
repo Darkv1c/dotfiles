@@ -1,0 +1,223 @@
+{
+  "$schema": "https://opencode.ai/theme.json",
+  "defs": {
+    "white": "#FFFFFF",
+    "offWhite": "#F5F5F5",
+    "lightGray": "#E0E0E0",
+    "gray": "#CCCCCC",
+    "darkGray": "#999999",
+    "gold": "#C2C206",
+    "goldLight": "#C2C206",
+    "goldDark": "#B5B50D",
+    "goldMuted": "#B5B50D",
+    "blue": "#007ACC",
+    "blueLight": "#007ACC",
+    "blueDark": "#007ACC",
+    "blueMuted": "#007ACC",
+    "accent": "#007ACC",
+    "error": "#C94A16",
+    "transparent": "none"
+  },
+  "theme": {
+    "primary": {
+      "dark": "gold",
+      "light": "goldDark"
+    },
+    "secondary": {
+      "dark": "blue",
+      "light": "blueDark"
+    },
+    "accent": {
+      "dark": "accent",
+      "light": "blueLight"
+    },
+    "error": {
+      "dark": "error",
+      "light": "error"
+    },
+    "warning": {
+      "dark": "goldLight",
+      "light": "goldDark"
+    },
+    "success": {
+      "dark": "#51CF66",
+      "light": "#43A047"
+    },
+    "info": {
+      "dark": "blueLight",
+      "light": "blueDark"
+    },
+    "text": {
+      "dark": "white",
+      "light": "offWhite"
+    },
+    "textMuted": {
+      "dark": "lightGray",
+      "light": "gray"
+    },
+    "background": {
+      "dark": "transparent",
+      "light": "transparent"
+    },
+    "backgroundPanel": {
+      "dark": "transparent",
+      "light": "transparent"
+    },
+    "backgroundElement": {
+      "dark": "transparent",
+      "light": "transparent"
+    },
+    "border": {
+      "dark": "blue",
+      "light": "blueDark"
+    },
+    "borderActive": {
+      "dark": "gold",
+      "light": "goldDark"
+    },
+    "borderSubtle": {
+      "dark": "blueMuted",
+      "light": "darkGray"
+    },
+    "diffAdded": {
+      "dark": "#51CF66",
+      "light": "#43A047"
+    },
+    "diffRemoved": {
+      "dark": "error",
+      "light": "error"
+    },
+    "diffContext": {
+      "dark": "gray",
+      "light": "darkGray"
+    },
+    "diffHunkHeader": {
+      "dark": "blue",
+      "light": "blueDark"
+    },
+    "diffHighlightAdded": {
+      "dark": "#51CF66",
+      "light": "#43A047"
+    },
+    "diffHighlightRemoved": {
+      "dark": "error",
+      "light": "error"
+    },
+    "diffAddedBg": {
+      "dark": "transparent",
+      "light": "transparent"
+    },
+    "diffRemovedBg": {
+      "dark": "transparent",
+      "light": "transparent"
+    },
+    "diffContextBg": {
+      "dark": "transparent",
+      "light": "transparent"
+    },
+    "diffLineNumber": {
+      "dark": "gray",
+      "light": "darkGray"
+    },
+    "diffAddedLineNumberBg": {
+      "dark": "transparent",
+      "light": "transparent"
+    },
+    "diffRemovedLineNumberBg": {
+      "dark": "transparent",
+      "light": "transparent"
+    },
+    "markdownText": {
+      "dark": "white",
+      "light": "offWhite"
+    },
+    "markdownHeading": {
+      "dark": "gold",
+      "light": "goldDark"
+    },
+    "markdownLink": {
+      "dark": "blue",
+      "light": "blueDark"
+    },
+    "markdownLinkText": {
+      "dark": "blueLight",
+      "light": "blueMuted"
+    },
+    "markdownCode": {
+      "dark": "goldLight",
+      "light": "goldMuted"
+    },
+    "markdownBlockQuote": {
+      "dark": "lightGray",
+      "light": "gray"
+    },
+    "markdownEmph": {
+      "dark": "blueLight",
+      "light": "blueMuted"
+    },
+    "markdownStrong": {
+      "dark": "gold",
+      "light": "goldDark"
+    },
+    "markdownHorizontalRule": {
+      "dark": "blue",
+      "light": "blueDark"
+    },
+    "markdownListItem": {
+      "dark": "white",
+      "light": "offWhite"
+    },
+    "markdownListEnumeration": {
+      "dark": "gold",
+      "light": "goldDark"
+    },
+    "markdownImage": {
+      "dark": "blueLight",
+      "light": "blueMuted"
+    },
+    "markdownImageText": {
+      "dark": "accent",
+      "light": "blueLight"
+    },
+    "markdownCodeBlock": {
+      "dark": "white",
+      "light": "offWhite"
+    },
+    "syntaxComment": {
+      "dark": "darkGray",
+      "light": "gray"
+    },
+    "syntaxKeyword": {
+      "dark": "gold",
+      "light": "goldDark"
+    },
+    "syntaxFunction": {
+      "dark": "blueLight",
+      "light": "blueMuted"
+    },
+    "syntaxVariable": {
+      "dark": "white",
+      "light": "offWhite"
+    },
+    "syntaxString": {
+      "dark": "goldLight",
+      "light": "goldMuted"
+    },
+    "syntaxNumber": {
+      "dark": "accent",
+      "light": "blueLight"
+    },
+    "syntaxType": {
+      "dark": "blue",
+      "light": "blueDark"
+    },
+    "syntaxOperator": {
+      "dark": "gold",
+      "light": "goldDark"
+    },
+    "syntaxPunctuation": {
+      "dark": "lightGray",
+      "light": "gray"
+    }
+  }
+}

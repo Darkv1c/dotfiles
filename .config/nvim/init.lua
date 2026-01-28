@@ -3,6 +3,11 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.relativenumber = true
 vim.opt.laststatus = 0
+vim.opt.wrap = true
+vim.opt.breakindent = true
+vim.opt.linebreak = true
+vim.g.loaded_netrw = 1
+vim.g.loaded_netrwPlugin = 1
 
 -- [[ Lazy.nvim Bootstrap ]]
 local lazypath = vim.fn.stdpath("data") .. "/lazy/lazy.nvim"
