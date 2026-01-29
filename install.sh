@@ -55,6 +55,8 @@ log_info "Installing for user: $ACTUAL_USER (home: $ACTUAL_HOME)"
 
 # Update
 log_step "Updating package lists"
+# Remove problematic repositories that may have invalid GPG keys
+sudo rm -f /etc/apt/sources.list.d/yarn.list 2>/dev/null || true
 sudo apt-get update
 
 # Install zsh
