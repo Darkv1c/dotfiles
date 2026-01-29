@@ -37,16 +37,20 @@ elif [ "$USER" = "root" ] && [ -n "$DEVPOD_USER" ]; then
     ACTUAL_USER="$DEVPOD_USER"
     ACTUAL_HOME=$(getent passwd "$DEVPOD_USER" | cut -d: -f6)
 elif [ "$USER" = "root" ]; then
-    # In devcontainers, look for vscode user first
-    if getent passwd vscode > /dev/null 2>&1; then
+    # In devcontainers, prefer /home/vscode if it exists (even if user doesn't exist yet)
+    if [ -d "/home/vscode" ]; then
+        ACTUAL_USER="vscode"
+        ACTUAL_HOME="/home/vscode"
+    # Otherwise try to detect vscode user via getent
+    elif getent passwd vscode > /dev/null 2>&1; then
         ACTUAL_USER="vscode"
         ACTUAL_HOME=$(getent passwd vscode | cut -d: -f6)
     else
         # Try to find a non-root user in the container by UID 1000
-        ACTUAL_USER=$(getent passwd 1000 | cut -d: -f1)
+        ACTUAL_USER=$(getent passwd 1000 | cut -d: -f1 2>/dev/null)
         if [ -z "$ACTUAL_USER" ]; then
-            ACTUAL_USER="$USER"
-            ACTUAL_HOME="$HOME"
+            ACTUAL_USER="root"
+            ACTUAL_HOME="/root"
         else
             ACTUAL_HOME=$(getent passwd "$ACTUAL_USER" | cut -d: -f6)
         fi
