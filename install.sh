@@ -203,37 +203,45 @@ else
     log_info "nvim installed successfully"
 fi
 
-# Neovim configuration
-log_step "Setting up neovim configuration"
-mkdir -p "$ACTUAL_HOME/.config/nvim/lua/plugins"
+# ============================================================================
+# .config directory setup
+# ============================================================================
+log_step "Setting up .config directory"
+mkdir -p "$ACTUAL_HOME/.config"
 
-if [ -f "$SCRIPT_DIR/.config/nvim/init.lua" ]; then
-    if [ "$SCRIPT_DIR/.config/nvim/init.lua" -ef "$ACTUAL_HOME/.config/nvim/init.lua" ]; then
-        log_warn "init.lua is already linked/configured, skipping"
+# Copy entire .config directory structure from dotfiles
+if [ -d "$SCRIPT_DIR/.config" ]; then
+    log_info "Copying .config directory contents..."
+    
+    # Use rsync if available (better handling of directory sync), otherwise cp
+    if command -v rsync &> /dev/null; then
+        rsync -av --ignore-existing "$SCRIPT_DIR/.config/" "$ACTUAL_HOME/.config/"
+        log_info "Synced .config directory with rsync"
     else
-        [ -L "$ACTUAL_HOME/.config/nvim/init.lua" ] && rm "$ACTUAL_HOME/.config/nvim/init.lua"
-        cp "$SCRIPT_DIR/.config/nvim/init.lua" "$ACTUAL_HOME/.config/nvim/init.lua"
-        log_info "Copied init.lua"
+        # Copy recursively, preserving structure
+        cp -r "$SCRIPT_DIR/.config/"* "$ACTUAL_HOME/.config/" 2>/dev/null || true
+        log_info "Copied .config directory contents"
     fi
-else
-    log_error "init.lua not found in $SCRIPT_DIR/.config/nvim/"
-fi
-
-for plugin_file in core.lua study.lua work.lua; do
-    if [ -f "$SCRIPT_DIR/.config/nvim/lua/plugins/$plugin_file" ]; then
-        src="$SCRIPT_DIR/.config/nvim/lua/plugins/$plugin_file"
-        dst="$ACTUAL_HOME/.config/nvim/lua/plugins/$plugin_file"
-        if [ "$src" -ef "$dst" ]; then
-            log_warn "$plugin_file is already linked/configured, skipping"
-        else
-            [ -L "$dst" ] && rm "$dst"
-            cp "$src" "$dst"
-            log_info "Copied $plugin_file"
+    
+    # List what was configured
+    log_info "Configured applications:"
+    for app_dir in "$SCRIPT_DIR/.config/"*/; do
+        if [ -d "$app_dir" ]; then
+            app_name=$(basename "$app_dir")
+            log_info "  - $app_name"
         fi
-    else
-        log_warn "$plugin_file not found, skipping"
-    fi
-done
+    done
+    
+    # Also list config files at root of .config
+    for config_file in "$SCRIPT_DIR/.config/"*.toml "$SCRIPT_DIR/.config/"*.json "$SCRIPT_DIR/.config/"*.conf; do
+        if [ -f "$config_file" ]; then
+            config_name=$(basename "$config_file")
+            log_info "  - $config_name"
+        fi
+    done
+else
+    log_error ".config directory not found in $SCRIPT_DIR"
+fi
 
 # Setup yazi.nvim plugin configuration
 log_step "Setting up yazi.nvim configuration"
@@ -269,27 +277,13 @@ EOF
 
 log_info "Created yazi.nvim plugin configuration"
 
-# Install tmux
+# Setup tmux configuration and plugin manager
 log_step "Installing tmux"
 if command -v tmux &> /dev/null; then
     log_warn "tmux is already installed, skipping"
 else
     sudo apt-get install -y tmux
     log_info "tmux installed successfully"
-fi
-
-# Setup tmux configuration and plugin manager
-log_step "Setting up tmux configuration"
-if [ -f "$SCRIPT_DIR/.tmux.conf" ]; then
-    if [ "$SCRIPT_DIR/.tmux.conf" -ef "$ACTUAL_HOME/.tmux.conf" ]; then
-        log_warn ".tmux.conf is already linked/configured, skipping"
-    else
-        [ -L "$ACTUAL_HOME/.tmux.conf" ] && rm "$ACTUAL_HOME/.tmux.conf"
-        cp "$SCRIPT_DIR/.tmux.conf" "$ACTUAL_HOME/.tmux.conf"
-        log_info "Copied .tmux.conf"
-    fi
-else
-    log_warn ".tmux.conf not found, skipping"
 fi
 
 # Install TPM (Tmux Plugin Manager)
@@ -300,13 +294,11 @@ else
     mkdir -p "$ACTUAL_HOME/.config/tmux/plugins"
     git clone https://github.com/tmux-plugins/tpm "$ACTUAL_HOME/.config/tmux/plugins/tpm"
     log_info "TPM installed successfully"
-    log_info "Run 'tmux source ~/.tmux.conf' and press prefix + I to install plugins"
+    log_info "Run 'tmux source ~/.config/tmux/tmux.conf' and press prefix + I to install plugins"
 fi
 
-# Zsh and Starship configuration
-log_step "Setting up shell configuration"
-mkdir -p "$ACTUAL_HOME/.config"
-
+# Zsh configuration
+log_step "Setting up zsh configuration"
 if [ -f "$SCRIPT_DIR/.zshrc" ]; then
     # Check if destination is already the same file (symlink or same path)
     if [ "$SCRIPT_DIR/.zshrc" -ef "$ACTUAL_HOME/.zshrc" ]; then
@@ -319,18 +311,6 @@ if [ -f "$SCRIPT_DIR/.zshrc" ]; then
     fi
 else
     log_error ".zshrc not found"
-fi
-
-if [ -f "$SCRIPT_DIR/.config/starship.toml" ]; then
-    if [ "$SCRIPT_DIR/.config/starship.toml" -ef "$ACTUAL_HOME/.config/starship.toml" ]; then
-        log_warn "starship.toml is already linked/configured, skipping"
-    else
-        [ -L "$ACTUAL_HOME/.config/starship.toml" ] && rm "$ACTUAL_HOME/.config/starship.toml"
-        cp "$SCRIPT_DIR/.config/starship.toml" "$ACTUAL_HOME/.config/starship.toml"
-        log_info "Copied starship.toml"
-    fi
-else
-    log_error "starship.toml not found"
 fi
 
 # Install file command (required for yazi file type detection)
@@ -473,35 +453,6 @@ else
     log_info "OpenCode installed successfully"
 fi
 
-log_step "Setting up OpenCode configuration"
-mkdir -p "$ACTUAL_HOME/.config/opencode/themes"
-if [ -f "$SCRIPT_DIR/.config/opencode/opencode.json" ]; then
-    src="$SCRIPT_DIR/.config/opencode/opencode.json"
-    dst="$ACTUAL_HOME/.config/opencode/opencode.json"
-    if [ "$src" -ef "$dst" ]; then
-        log_warn "opencode.json is already linked/configured, skipping"
-    else
-        [ -L "$dst" ] && rm "$dst"
-        cp "$src" "$dst"
-        log_info "Copied opencode.json"
-    fi
-else
-    log_warn "opencode.json not found, skipping"
-fi
-if [ -f "$SCRIPT_DIR/.config/opencode/themes/transparent-gold-blue.json" ]; then
-    src="$SCRIPT_DIR/.config/opencode/themes/transparent-gold-blue.json"
-    dst="$ACTUAL_HOME/.config/opencode/themes/transparent-gold-blue.json"
-    if [ "$src" -ef "$dst" ]; then
-        log_warn "transparent-gold-blue theme is already linked/configured, skipping"
-    else
-        [ -L "$dst" ] && rm "$dst"
-        cp "$src" "$dst"
-        log_info "Copied transparent-gold-blue theme"
-    fi
-else
-    log_warn "transparent-gold-blue theme not found, skipping"
-fi
-
 # Set zsh as default shell for the actual user (if not already set)
 if [ "$(getent passwd "$ACTUAL_USER" | cut -d: -f7)" != "$(which zsh)" ]; then
     log_step "Setting zsh as default shell for $ACTUAL_USER"
@@ -513,8 +464,8 @@ log_info "✓ Installation complete!"
 log_info "Please log out and log back in for zsh to take effect."
 log_info "Or run: exec zsh"
 log_info ""
-log_info "🔧 Yazi.nvim setup notes:"
-log_info "- Yazi is installed at /usr/local/bin/ (included in PATH)"
-log_info "- Desktop entry created with proper PATH configuration"
-log_info "- Plugin configured to use explicit yazi binary path"
-log_info "- Use '-' key in nvim to open yazi, or 'Ctrl+Up' to toggle"
+log_info "🔧 Setup notes:"
+log_info "- Tmux: Run 'tmux source ~/.config/tmux/tmux.conf' then prefix + I to install plugins"
+log_info "- Yazi: Installed at /usr/local/bin/ (included in PATH)"
+log_info "- Neovim: Use '-' to open yazi, or 'Ctrl+Up' to toggle"
+log_info "- All .config files synced from dotfiles"
