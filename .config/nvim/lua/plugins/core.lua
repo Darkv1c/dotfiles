@@ -181,9 +181,6 @@ return {
 		config = function()
 			vim.g.opencode_opts = {
 				theme = "nord",
-				provider = {
-					enabled = "terminal",
-				},
 			}
 
 			vim.opt.autoread = true
