@@ -218,13 +218,23 @@ fi
 log_step "Setting up .config directory"
 mkdir -p "$ACTUAL_HOME/.config"
 
-# Copy entire .config directory structure from dotfiles
+# Clone zsh-vi-mode plugin if not exists
+if [ ! -d "$ACTUAL_HOME/.config/zsh/zsh-vi-mode" ]; then
+    log_info "Cloning zsh-vi-mode plugin..."
+    mkdir -p "$ACTUAL_HOME/.config/zsh"
+    git clone https://github.com/jeffreytse/zsh-vi-mode.git "$ACTUAL_HOME/.config/zsh/zsh-vi-mode"
+    log_info "zsh-vi-mode plugin cloned successfully"
+else
+    log_info "zsh-vi-mode plugin already exists, skipping"
+fi
+
+# Copy entire .config directory structure from dotfiles (excluding zsh-vi-mode since we clone it)
 if [ -d "$SCRIPT_DIR/.config" ]; then
     log_info "Copying .config directory contents..."
     
     # Use rsync if available (better handling of directory sync), otherwise cp
     if command -v rsync &> /dev/null; then
-        rsync -av --ignore-existing "$SCRIPT_DIR/.config/" "$ACTUAL_HOME/.config/"
+        rsync -av --ignore-existing "$SCRIPT_DIR/.config/" "$ACTUAL_HOME/.config/" --exclude zsh-vi-mode
         log_info "Synced .config directory with rsync"
     else
         # Copy recursively, preserving structure
