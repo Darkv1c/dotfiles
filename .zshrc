@@ -42,3 +42,9 @@ export VISUAL=nvim
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu select
 source ~/.config/zsh/zsh-vi-mode/zsh-vi-mode.zsh
+
+# Add yazi to PATH
+export PATH="/usr/local/bin:$PATH"
+
+# Neovim profile (work, study, default)
+export NVIM_PROFILE=work

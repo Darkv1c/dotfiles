@@ -93,21 +93,24 @@ vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" }
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic list (loclist)" })
 vim.diagnostic.config({ virtual_text = true, virtual_lines = true })
 
--- Copilot keymaps
-vim.keymap.set("i", "<leader><leader>", "copilot#Accept()", {
+-- Copilot keymaps (using Ctrl combos to avoid leader conflicts in insert mode)
+vim.keymap.set("i", "<C-j>", "copilot#Accept()", {
 	expr = true,
 	silent = true,
 	replace_keycodes = false,
+	desc = "Accept Copilot suggestion",
 })
-vim.keymap.set("i", "<leader><Tab>", "copilot#Next()", {
+vim.keymap.set("i", "<C-]>", "copilot#Next()", {
 	expr = true,
 	silent = true,
 	replace_keycodes = false,
+	desc = "Next Copilot suggestion",
 })
-vim.keymap.set("i", "<leader><S-Tab>", "copilot#Previous()", {
+vim.keymap.set("i", "<C-\\>", "copilot#Previous()", {
 	expr = true,
 	silent = true,
 	replace_keycodes = false,
+	desc = "Previous Copilot suggestion",
 })
 
 -- [[ Autocommands ]]
@@ -121,17 +124,22 @@ vim.api.nvim_create_autocmd('LspAttach', {
 	group = vim.api.nvim_create_augroup('LspAttach', { clear = false }),
 	callback = function(event)
 		local opts = { buffer = event.buf }
-		vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, opts)
-	end,
-})
-vim.api.nvim_create_autocmd('LspAttach', {
-	callback = function(ev)
-		vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { buffer = ev.buf })
-	end,
-})
-vim.api.nvim_create_autocmd('LspAttach', {
-	callback = function(ev)
-		vim.keymap.set('n', 'gd', vim.lsp.buf.definition, { buffer = ev.buf })
+		-- Navigation
+		vim.keymap.set('n', 'gd', vim.lsp.buf.definition, vim.tbl_extend('force', opts, { desc = 'Go to definition' }))
+		vim.keymap.set('n', 'gD', vim.lsp.buf.declaration, vim.tbl_extend('force', opts, { desc = 'Go to declaration' }))
+		vim.keymap.set('n', 'gi', vim.lsp.buf.implementation, vim.tbl_extend('force', opts, { desc = 'Go to implementation' }))
+		vim.keymap.set('n', 'gr', vim.lsp.buf.references, vim.tbl_extend('force', opts, { desc = 'Find references' }))
+		vim.keymap.set('n', '<leader>D', vim.lsp.buf.type_definition, vim.tbl_extend('force', opts, { desc = 'Go to type definition' }))
+		-- Information
+		vim.keymap.set('n', 'K', vim.lsp.buf.hover, vim.tbl_extend('force', opts, { desc = 'Hover documentation' }))
+		vim.keymap.set('n', '<C-k>', vim.lsp.buf.signature_help, vim.tbl_extend('force', opts, { desc = 'Signature help' }))
+		vim.keymap.set('i', '<C-k>', vim.lsp.buf.signature_help, vim.tbl_extend('force', opts, { desc = 'Signature help' }))
+		-- Refactoring
+		vim.keymap.set('n', '<leader>rn', vim.lsp.buf.rename, vim.tbl_extend('force', opts, { desc = 'Rename symbol' }))
+		vim.keymap.set({ 'n', 'v' }, '<leader>ca', vim.lsp.buf.code_action, vim.tbl_extend('force', opts, { desc = 'Code actions' }))
+		-- Symbols
+		vim.keymap.set('n', '<leader>ds', vim.lsp.buf.document_symbol, vim.tbl_extend('force', opts, { desc = 'Document symbols' }))
+		vim.keymap.set('n', '<leader>ws', vim.lsp.buf.workspace_symbol, vim.tbl_extend('force', opts, { desc = 'Workspace symbols' }))
 	end,
 })
 

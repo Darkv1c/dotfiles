@@ -2,6 +2,34 @@
 -- Activate with: NVIM_PROFILE=work nvim
 
 return {
+	-- Treesitter parsers for React/Web development
+	{
+		"nvim-treesitter/nvim-treesitter",
+		init = function()
+			-- Register additional parsers for work profile
+			-- core.lua's config will pick these up via vim.g.treesitter_extra_parsers
+			vim.g.treesitter_extra_parsers = {
+				"javascript", "typescript", "tsx",
+				"html", "css", "scss",
+				"json", "graphql",
+			}
+		end,
+	},
+
+	-- Auto close and rename HTML/JSX tags
+	{
+		"windwp/nvim-ts-autotag",
+		event = { "BufReadPre", "BufNewFile" },
+		ft = { "html", "javascript", "javascriptreact", "typescript", "typescriptreact", "xml" },
+		opts = {
+			opts = {
+				enable_close = true,
+				enable_rename = true,
+				enable_close_on_slash = true,
+			},
+		},
+	},
+
 	-- TypeScript/JavaScript LSP additional support
 	{
 		"pmizio/typescript-tools.nvim",
@@ -9,9 +37,12 @@ return {
 		dependencies = {
 			"nvim-lua/plenary.nvim",
 			"neovim/nvim-lspconfig",
+			"hrsh7th/cmp-nvim-lsp",
 		},
 		config = function()
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 			require("typescript-tools").setup({
+				capabilities = capabilities,
 				settings = {
 					separate_diagnostic_server = true,
 					publish_diagnostic_on = "insert_leave",
@@ -58,30 +89,14 @@ return {
 		end,
 	},
 
-	-- ESLint integration
+	-- Mason + LSP: ensure React/Web servers and formatters are installed
 	{
 		"neovim/nvim-lspconfig",
-		ft = { "javascript", "javascriptreact", "typescript", "typescriptreact" },
-		opts = function()
-			local lspconfig = require("lspconfig")
-			lspconfig.eslint.setup({
-				on_attach = function(_, bufnr)
-					vim.api.nvim_create_autocmd("BufWritePre", {
-						buffer = bufnr,
-						command = "EslintFixAll",
-					})
-				end,
-			})
-		end,
-	},
-
-	-- Tailwind CSS support
-	{
-		"neovim/nvim-lspconfig",
-		ft = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact" },
-		opts = function()
-			local lspconfig = require("lspconfig")
-			lspconfig.tailwindcss.setup({})
+		init = function()
+			-- Register extra LSP servers for work profile
+			vim.g.mason_extra_servers = { "eslint", "tailwindcss", "jsonls" }
+			-- Register extra formatters/tools for work profile
+			vim.g.mason_extra_tools = { "prettier" }
 		end,
 	},
 }

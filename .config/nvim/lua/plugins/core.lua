@@ -55,6 +55,34 @@ return {
 		opts = {},
 	},
 	
+	-- Treesitter (Syntax Highlighting, Indentation)
+	{
+		"nvim-treesitter/nvim-treesitter",
+		lazy = false,
+		build = ":TSUpdate",
+		config = function()
+			require("nvim-treesitter").setup({
+				install_dir = vim.fn.stdpath("data") .. "/site",
+			})
+			-- Install base parsers
+			local parsers = { "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline" }
+			-- Merge extra parsers from profiles (e.g. work.lua sets vim.g.treesitter_extra_parsers)
+			local extra = vim.g.treesitter_extra_parsers
+			if extra then
+				for _, p in ipairs(extra) do
+					table.insert(parsers, p)
+				end
+			end
+			require("nvim-treesitter").install(parsers)
+			-- Enable treesitter highlighting for all supported filetypes
+			vim.api.nvim_create_autocmd("FileType", {
+				callback = function()
+					pcall(vim.treesitter.start)
+				end,
+			})
+		end,
+	},
+
 	-- Autopairs
 	{
 		"windwp/nvim-autopairs",
@@ -100,18 +128,25 @@ return {
 		config = function()
 			-- Setup Mason (The installer)
 			require("mason").setup()
+			-- Build ensure_installed list from base + profile extras
+			local ensure_installed = { "lua_ls" }
+			local extra_servers = vim.g.mason_extra_servers
+			if extra_servers then
+				for _, s in ipairs(extra_servers) do
+					table.insert(ensure_installed, s)
+				end
+			end
 			-- Setup Mason-LSPConfig (Automation)
+			local capabilities = require("cmp_nvim_lsp").default_capabilities()
 			require("mason-lspconfig").setup({
-				ensure_installed = { "lua_ls" },
+				ensure_installed = ensure_installed,
 				handlers = {
 					function(server_name)
-						local capabilities = require("cmp_nvim_lsp").default_capabilities()
 						require("lspconfig")[server_name].setup({
 							capabilities = capabilities,
 						})
 					end,
 					["lua_ls"] = function()
-						local capabilities = require("cmp_nvim_lsp").default_capabilities()
 						require("lspconfig").lua_ls.setup({
 							capabilities = capabilities,
 							settings = {
@@ -121,8 +156,49 @@ return {
 							},
 						})
 					end,
+					["eslint"] = function()
+						require("lspconfig").eslint.setup({
+							capabilities = capabilities,
+							on_attach = function(_, bufnr)
+								vim.api.nvim_create_autocmd("BufWritePre", {
+									buffer = bufnr,
+									command = "EslintFixAll",
+								})
+							end,
+						})
+					end,
+					["jsonls"] = function()
+						require("lspconfig").jsonls.setup({
+							capabilities = capabilities,
+							settings = {
+								json = {
+									schemas = require("lspconfig").util.default_config
+											and require("lspconfig").util.default_config.settings
+											and require("lspconfig").util.default_config.settings.json
+											and require("lspconfig").util.default_config.settings.json.schemas
+										or {},
+									validate = { enable = true },
+								},
+							},
+						})
+					end,
 				},
 			})
+			-- Install formatters via Mason
+			local ensure_tools = { "stylua" }
+			local extra_tools = vim.g.mason_extra_tools
+			if extra_tools then
+				for _, t in ipairs(extra_tools) do
+					table.insert(ensure_tools, t)
+				end
+			end
+			local mr = require("mason-registry")
+			for _, tool in ipairs(ensure_tools) do
+				local p = mr.get_package(tool)
+				if not p:is_installed() then
+					p:install()
+				end
+			end
 		end,
 	},
 
@@ -137,6 +213,7 @@ return {
 		config = function()
 			local cmp = require("cmp")
 			local luasnip = require("luasnip")
+
 			cmp.setup({
 				snippet = {
 					expand = function(args)
@@ -158,6 +235,14 @@ return {
 					{ name = "buffer" },
 				}),
 			})
+
+			-- Disable Copilot ghost text when cmp menu is visible
+			cmp.event:on("menu_opened", function()
+				vim.b.copilot_suggestion_hidden = true
+			end)
+			cmp.event:on("menu_closed", function()
+				vim.b.copilot_suggestion_hidden = false
+			end)
 		end,
 	},
 
@@ -168,7 +253,6 @@ return {
 		config = function()
 			vim.g.copilot_no_tab_map = true -- Disable default Tab mapping
 			vim.g.copilot_assume_mapped = true -- Assume Tab is already mapped
-			vim.g.copilot_tab_expands = true -- Allow expanding suggestions with Tab
 		end,
 	},
 
@@ -232,35 +316,31 @@ return {
 	{
 		"stevearc/conform.nvim",
 		event = { "BufReadPre", "BufNewFile" },
-		config = function()
-			local conform = require("conform")
-
-			conform.setup({
-				formatters_by_ft = {
-					lua = { "stylua" },
-				},
-
-				default_format_opts = {
-					lsp_fallback = true,
-				},
-
-				format_on_save = function(bufnr)
-					local ignore_filetypes = { "sql", "java" }
-					if vim.tbl_contains(ignore_filetypes, vim.bo[bufnr].filetype) then
-						return
-					end
-
-					if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
-						return
-					end
-
-					return { timeout_ms = 500, lsp_format = "fallback" }
-				end,
-			})
-
-			vim.keymap.set({ "n", "v" }, "<leader>f", function()
-				conform.format({ async = true, lsp_fallback = true })
-			end, { desc = "Format buffer with conform" })
-		end,
+		keys = {
+			{
+				"<leader>f",
+				function() require("conform").format({ async = true, lsp_fallback = true }) end,
+				mode = { "n", "v" },
+				desc = "Format buffer with conform",
+			},
+		},
+		opts = {
+			formatters_by_ft = {
+				lua = { "stylua" },
+			},
+			default_format_opts = {
+				lsp_fallback = true,
+			},
+			format_on_save = function(bufnr)
+				local ignore_filetypes = { "sql", "java" }
+				if vim.tbl_contains(ignore_filetypes, vim.bo[bufnr].filetype) then
+					return
+				end
+				if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
+					return
+				end
+				return { timeout_ms = 500, lsp_format = "fallback" }
+			end,
+		},
 	},
 }
