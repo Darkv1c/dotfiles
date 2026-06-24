@@ -3,7 +3,7 @@ vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.relativenumber = true
 vim.opt.laststatus = 3
-vim.opt.statusline = "%f %m"
+vim.opt.statusline = "%=" .. " %f"
 vim.opt.wrap = true
 vim.opt.breakindent = true
 vim.opt.linebreak = true
@@ -54,6 +54,10 @@ vim.api.nvim_set_hl(0, "Normal", { bg = "none" })
 vim.api.nvim_set_hl(0, "NormalFloat", { bg = "none" })
 vim.api.nvim_set_hl(0, "FloatBorder", { bg = "none" })
 vim.api.nvim_set_hl(0, "Pmenu", { bg = "none" })
+vim.api.nvim_set_hl(0, "StatusLine", { bg = "NONE", fg = "NONE" })
+vim.api.nvim_set_hl(0, "StatusLineNC", { bg = "NONE", fg = "NONE" })
+vim.api.nvim_set_hl(0, "StatusLineTerm", { bg = "NONE", fg = "NONE" })
+vim.api.nvim_set_hl(0, "StatusLineTermNC", { bg = "NONE", fg = "NONE" })
 
 -- Line numbers golden lunaperche style
 vim.api.nvim_set_hl(0, "LineNr", { fg = "#FFFFFF" })
