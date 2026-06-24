@@ -2,7 +2,8 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.relativenumber = true
-vim.opt.laststatus = 0
+vim.opt.laststatus = 3
+vim.opt.statusline = "%f %m"
 vim.opt.wrap = true
 vim.opt.breakindent = true
 vim.opt.linebreak = true

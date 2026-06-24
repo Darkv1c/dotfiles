@@ -65,7 +65,7 @@ return {
 				install_dir = vim.fn.stdpath("data") .. "/site",
 			})
 			-- Install base parsers
-			local parsers = { "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline" }
+			local parsers = { "lua", "vim", "vimdoc", "query", "markdown", "markdown_inline", "bash" }
 			-- Merge extra parsers from profiles (e.g. work.lua sets vim.g.treesitter_extra_parsers)
 			local extra = vim.g.treesitter_extra_parsers
 			if extra then
@@ -90,7 +90,7 @@ return {
 			require("nvim-autopairs").setup({})
 		end,
 	},
-	
+
 	-- Telescope (Finder)
 	{
 		"nvim-telescope/telescope.nvim",
@@ -118,6 +118,36 @@ return {
 		end,
 	},
 
+	-- Toggleable terminal
+	{
+		"akinsho/toggleterm.nvim",
+		cmd = { "ToggleTerm", "TermExec" },
+		keys = {
+			{ "<leader>tt", "<cmd>ToggleTerm<cr>", desc = "Toggle terminal" },
+			{ "<leader>tf", "<cmd>ToggleTerm direction=float<cr>", desc = "Floating terminal" },
+			{ "<leader>r", function()
+				local file = vim.fn.expand("%:p")
+				if file == "" then return end
+				local shebang = vim.fn.readfile(file, "", 1)[1]
+				local cmd
+				if shebang and shebang:match("^#!") then
+					cmd = file
+				else
+					local ft = vim.bo.filetype
+					local runners = { sh = "bash", python = "python3", lua = "lua", javascript = "node", typescript = "node" }
+					cmd = (runners[ft] or "bash") .. " " .. file
+				end
+				vim.cmd("TermExec direction=float cmd='" .. cmd:gsub("'", "'\\''") .. "'")
+			end, desc = "Run current file (float)" },
+		},
+		opts = {
+			size = 12,
+			on_create = function()
+				vim.keymap.set("t", "<leader>tt", "<C-\\><C-n><cmd>ToggleTerm<cr>", { desc = "Hide terminal" })
+			end,
+		},
+	},
+
 	-- LSP & Mason (Intelligence, Linters & Errors)
 	{
 		"neovim/nvim-lspconfig",
@@ -129,7 +159,7 @@ return {
 			-- Setup Mason (The installer)
 			require("mason").setup()
 			-- Build ensure_installed list from base + profile extras
-			local ensure_installed = { "lua_ls" }
+			local ensure_installed = { "lua_ls", "bashls" }
 			local extra_servers = vim.g.mason_extra_servers
 			if extra_servers then
 				for _, s in ipairs(extra_servers) do
@@ -191,7 +221,7 @@ return {
 				},
 			})
 			-- Install formatters via Mason
-			local ensure_tools = { "stylua" }
+			local ensure_tools = { "stylua", "black", "isort", "shfmt" }
 			local extra_tools = vim.g.mason_extra_tools
 			if extra_tools then
 				for _, t in ipairs(extra_tools) do
@@ -213,6 +243,7 @@ return {
 		"hrsh7th/nvim-cmp",
 		dependencies = {
 			"hrsh7th/cmp-nvim-lsp",
+			"hrsh7th/cmp-path",
 			"L3MON4D3/LuaSnip",
 			"saadparwaiz1/cmp_luasnip",
 		},
@@ -229,13 +260,14 @@ return {
 				mapping = cmp.mapping.preset.insert({
 					["<C-b>"] = cmp.mapping.scroll_docs(-4),
 					["<C-f>"] = cmp.mapping.scroll_docs(4),
-					["<C-Space>"] = cmp.mapping.complete(),
+					["<C-l>"] = cmp.mapping.complete(),
 					["<CR>"] = cmp.mapping.confirm({ select = true }),
 					["<Tab>"] = cmp.mapping.select_next_item(),
 					["<S-Tab>"] = cmp.mapping.select_prev_item(),
 				}),
 				sources = cmp.config.sources({
 					{ name = "nvim_lsp" },
+					{ name = "path" },
 					{ name = "luasnip" },
 				}, {
 					{ name = "buffer" },
@@ -266,72 +298,69 @@ return {
 	{
 		"NickvanDyke/opencode.nvim",
 		dependencies = {
-			{ "folke/snacks.nvim", opts = { input = {}, picker = {} } },
+			{
+				"folke/snacks.nvim",
+				opts = {
+					input = {},
+					picker = {},
+					terminal = {},
+				},
+			},
 		},
 		config = function()
+			local opencode_cmd = "opencode --port"
+			local snacks_terminal_opts = {
+				win = {
+					position = "right",
+					enter = false,
+				},
+			}
+
 			vim.g.opencode_opts = {
-				theme = "nord",
 				server = {
 					start = function()
-						require("opencode.terminal").open("env TERM=xterm-256color opencode --port", {
-							split = "right",
-							width = math.floor(vim.o.columns * 0.35),
-						})
-					end,
-					stop = function()
-						require("opencode.terminal").close()
-					end,
-					toggle = function()
-						require("opencode.terminal").toggle("env TERM=xterm-256color opencode --port", {
-							split = "right",
-							width = math.floor(vim.o.columns * 0.35),
-						})
+						require("snacks.terminal").open(opencode_cmd, snacks_terminal_opts)
 					end,
 				},
 			}
 
 			vim.opt.autoread = true
 
-			-- Keymaps
+			vim.keymap.set({ "n", "t" }, "<leader>ot", function()
+				require("snacks.terminal").toggle(opencode_cmd, snacks_terminal_opts)
+			end, { desc = "Toggle OpenCode terminal" })
+
 			vim.keymap.set({ "n", "x" }, "<leader>oa",
-				function() require("opencode").ask("@this: ", { submit = true }) end,
-				{ desc = "Ask about this" })
+				function() require("opencode").ask("@this: ") end,
+				{ desc = "Ask OpenCode" })
 
 			vim.keymap.set({ "n", "x" }, "<leader>os",
 				function() require("opencode").select() end,
-				{ desc = "Select prompt" })
+				{ desc = "Select OpenCode action" })
 
 			vim.keymap.set({ "n", "x" }, "<leader>o+",
 				function() require("opencode").prompt("@this") end,
-				{ desc = "Add this" })
-
-			vim.keymap.set("n", "<leader>ot",
-				function() require("opencode").toggle() end,
-				{ desc = "Toggle embedded" })
-
-			vim.keymap.set("n", "<leader>oc",
-				function() require("opencode").command() end,
-				{ desc = "Select command" })
+				{ desc = "Add this to context" })
 
 			vim.keymap.set("n", "<leader>on",
-				function() require("opencode").command("session_new") end,
+				function() require("opencode").command("session.new") end,
 				{ desc = "New session" })
 
 			vim.keymap.set("n", "<leader>oi",
-				function() require("opencode").command("session_interrupt") end,
+				function() require("opencode").command("session.interrupt") end,
 				{ desc = "Interrupt session" })
 
 			vim.keymap.set("n", "<leader>oA",
-				function() require("opencode").command("agent_cycle") end,
-				{ desc = "Cycle selected agent" })
+				function() require("opencode").command("agent.cycle") end,
+				{ desc = "Cycle agent" })
 
 			vim.keymap.set("n", "<S-C-u>",
-				function() require("opencode").command("messages_half_page_up") end,
-				{ desc = "Messages half page up" })
+				function() require("opencode").command("session.half.page.up") end,
+				{ desc = "Scroll up" })
 
 			vim.keymap.set("n", "<S-C-d>",
-				function() require("opencode").command("messages_half_page_down") end,
-				{ desc = "Messages half page down" })
+				function() require("opencode").command("session.half.page.down") end,
+				{ desc = "Scroll down" })
 		end,
 	},
 
@@ -373,6 +402,8 @@ return {
 		opts = {
 			formatters_by_ft = {
 				lua = { "stylua" },
+				python = { "black", "isort", stop_after_first = true },
+				sh = { "shfmt" },
 				javascript = { "prettierd", "prettier", stop_after_first = true },
 				javascriptreact = { "prettierd", "prettier", stop_after_first = true },
 				typescript = { "prettierd", "prettier", stop_after_first = true },
@@ -383,11 +414,18 @@ return {
 				scss = { "prettierd", "prettier", stop_after_first = true },
 				html = { "prettierd", "prettier", stop_after_first = true },
 				vue = { "prettierd", "prettier", stop_after_first = true },
+				markdown = { "prettierd", "prettier", stop_after_first = true },
+				yaml = { "prettierd", "prettier", stop_after_first = true },
 			},
-			default_format_opts = {
-				lsp_fallback = true,
+		formatters = {
+			shfmt = {
+				args = { "-i", "2" },
 			},
-			format_on_save = function(bufnr)
+		},
+		default_format_opts = {
+			lsp_fallback = true,
+		},
+			format_after_save = function(bufnr)
 				local ignore_filetypes = { "sql", "java" }
 				if vim.tbl_contains(ignore_filetypes, vim.bo[bufnr].filetype) then
 					return
@@ -395,7 +433,7 @@ return {
 				if vim.g.disable_autoformat or vim.b[bufnr].disable_autoformat then
 					return
 				end
-				return { timeout_ms = 5000, lsp_format = "fallback" }
+				return { lsp_format = "fallback" }
 			end,
 		},
 	},

@@ -350,7 +350,8 @@ return {
 			-- Register extra LSP servers for work profile
 			vim.g.mason_extra_servers = { "eslint", "tailwindcss", "jsonls" }
 			-- Register extra formatters/tools for work profile
-			vim.g.mason_extra_tools = { "prettierd" }
+			vim.g.mason_extra_tools = { "prettierd", "prettier" }
 		end,
 	},
 }
+
