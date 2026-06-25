@@ -123,7 +123,21 @@ return {
 		"akinsho/toggleterm.nvim",
 		cmd = { "ToggleTerm", "TermExec" },
 		keys = {
-			{ "<leader>tt", "<cmd>ToggleTerm<cr>", desc = "Toggle terminal" },
+			{ "<leader>tt", function()
+				local zoomed = Snacks.zen.win and Snacks.zen.win:valid()
+				if zoomed then
+					Snacks.zen.zoom()
+				end
+				vim.cmd("ToggleTerm")
+				if not zoomed then
+					vim.defer_fn(function()
+						if vim.bo.buftype == "terminal" then
+							Snacks.zen.zoom()
+							vim.cmd("redraw!")
+						end
+					end, 100)
+				end
+			end, mode = { "n", "t" }, desc = "Toggle terminal" },
 			{ "<leader>tf", "<cmd>ToggleTerm direction=float<cr>", desc = "Floating terminal" },
 			{ "<leader>r", function()
 				local file = vim.fn.expand("%:p")
@@ -143,7 +157,6 @@ return {
 		opts = {
 			size = 12,
 			on_create = function()
-				vim.keymap.set("t", "<leader>tt", "<C-\\><C-n><cmd>ToggleTerm<cr>", { desc = "Hide terminal" })
 			end,
 		},
 	},
@@ -316,18 +329,47 @@ return {
 				},
 			}
 
+			local function zoom_term(term)
+				if term then
+					vim.defer_fn(function()
+						term:focus()
+						Snacks.zen.zoom()
+						vim.cmd("redraw!")
+					end, 100)
+				end
+			end
+
 			vim.g.opencode_opts = {
 				server = {
 					start = function()
-						require("snacks.terminal").open(opencode_cmd, snacks_terminal_opts)
+						zoom_term(require("snacks.terminal").open(opencode_cmd, snacks_terminal_opts))
 					end,
 				},
 			}
 
 			vim.opt.autoread = true
 
-			vim.keymap.set({ "n", "t" }, "<leader>ot", function()
-				require("snacks.terminal").toggle(opencode_cmd, snacks_terminal_opts)
+			vim.keymap.set("n", "<leader>ot", function()
+				local term = require("snacks.terminal").get(opencode_cmd, snacks_terminal_opts)
+				local zoomed = Snacks.zen.win and Snacks.zen.win:valid()
+				if term:valid() then
+					if zoomed then
+						Snacks.zen.zoom()
+						vim.defer_fn(function()
+							term:hide()
+							vim.cmd("redraw!")
+						end, 50)
+					else
+						term:hide()
+					end
+				else
+					term:show()
+					vim.defer_fn(function()
+						term:focus()
+						Snacks.zen.zoom()
+						vim.cmd("redraw!")
+					end, 100)
+				end
 			end, { desc = "Toggle OpenCode terminal" })
 
 			vim.keymap.set({ "n", "x" }, "<leader>oa",
@@ -361,6 +403,9 @@ return {
 			vim.keymap.set("n", "<S-C-d>",
 				function() require("opencode").command("session.half.page.down") end,
 				{ desc = "Scroll down" })
+
+			vim.keymap.set("n", "<leader>zz", Snacks.zen.zoom,
+				{ desc = "Toggle full screen" })
 		end,
 	},
 

@@ -2,6 +2,7 @@
 vim.g.mapleader = ' '
 vim.g.maplocalleader = ' '
 vim.g.relativenumber = true
+
 vim.opt.laststatus = 3
 vim.opt.statusline = "%=" .. " %f"
 vim.opt.wrap = true
@@ -93,6 +94,9 @@ vim.keymap.set("n", "<leader>l", "<C-w>l", { noremap = true })
 
 -- Custom mappings
 vim.keymap.set("n", "ñ", ";", { noremap = true })
+
+-- <leader>s to save
+vim.keymap.set("n", "<leader>s", "<cmd>w<CR>", { desc = "Save file" })
 
 -- Diagnostics (errors and warnings)
 vim.keymap.set("n", "<leader>e", vim.diagnostic.open_float, { desc = "Show diagnostic message (float)" })
