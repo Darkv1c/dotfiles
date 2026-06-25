@@ -326,6 +326,9 @@ return {
 				win = {
 					position = "right",
 					enter = false,
+					keys = {
+						term_normal = false,
+					},
 				},
 			}
 
