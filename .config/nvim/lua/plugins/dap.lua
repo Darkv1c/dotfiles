@@ -47,16 +47,25 @@ return {
       })
       dapui.setup = function() end -- prevent re-init
 
-      -- Show REPL output when debug session ends
+      -- Open runInTerminal as a floating window
+      dap.defaults.fallback.terminal_win_opts = {
+        relative = "editor",
+        width = math.floor(vim.o.columns * 0.8),
+        height = math.floor(vim.o.lines * 0.3),
+        row = math.floor(vim.o.lines * 0.6),
+        col = math.floor(vim.o.columns * 0.1),
+        style = "minimal",
+        border = "single",
+      }
+
+      -- Notify when debug session ends (terminal output is already visible)
       dap.listeners.after.event_terminated["dapui"] = function()
         vim.schedule(function()
-          dap.repl.open({ height = 12 })
           vim.notify("Debug session terminated", vim.log.levels.INFO)
         end)
       end
       dap.listeners.after.event_exited["dapui"] = function()
         vim.schedule(function()
-          dap.repl.open({ height = 12 })
           vim.notify("Debug session exited", vim.log.levels.INFO)
         end)
       end
@@ -108,7 +117,7 @@ return {
           pathMkfifo = "/usr/bin/mkfifo",
           pathPkill = "/usr/bin/pkill",
           env = vim.empty_dict(),
-          terminalKind = "debugConsole",
+          terminalKind = "integrated",
         },
       }
       -- Same config for .bash extension
