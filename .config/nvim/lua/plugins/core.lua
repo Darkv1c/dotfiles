@@ -167,6 +167,7 @@ return {
 		dependencies = {
 			"williamboman/mason.nvim",
 			"williamboman/mason-lspconfig.nvim",
+			"hrsh7th/cmp-nvim-lsp",
 		},
 		config = function()
 			-- Setup Mason (The installer)
@@ -344,11 +345,26 @@ return {
 
 			vim.g.opencode_opts = {
 				server = {
-					start = function()
-						zoom_term(require("snacks.terminal").open(opencode_cmd, snacks_terminal_opts))
-					end,
+			start = function()
+							require("snacks.terminal").open(opencode_cmd, snacks_terminal_opts)
+						end,
 				},
 			}
+
+			local orig_prompt = require("opencode.api.prompt").prompt
+			require("opencode.api.prompt").prompt = function(prompt_text, context)
+				return orig_prompt(prompt_text, context):next(function()
+					vim.schedule(function()
+						local term = require("snacks.terminal").get(opencode_cmd, snacks_terminal_opts)
+						if term and term:valid() then
+							term:show()
+							term:focus()
+							Snacks.zen.zoom()
+							vim.cmd("redraw!")
+						end
+					end)
+				end)
+			end
 
 			vim.opt.autoread = true
 
