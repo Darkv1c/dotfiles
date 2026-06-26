@@ -79,7 +79,7 @@ vim.o.confirm = true
 vim.o.foldmethod = "expr"
 vim.o.foldlevel = 99 -- Start with all folds open
 
--- Fold consecutive comment lines (#) + treesitter for code
+-- Fold consecutive comment lines (#) nested inside treesitter folds
 vim.g.foldexpr_func = function()
 	local lnum = vim.v.lnum
 	local line = vim.fn.getline(lnum)
@@ -87,12 +87,9 @@ vim.g.foldexpr_func = function()
 
 	if line:match("^%s*#") then
 		if not prev:match("^%s*#") then
-			return ">1"
+			return ">2"
 		end
-		return "1"
-	end
-	if prev:match("^%s*#") then
-		return "<1"
+		return "2"
 	end
 
 	return vim.treesitter.foldexpr()
