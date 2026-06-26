@@ -128,6 +128,35 @@ vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagn
 vim.diagnostic.config({ virtual_text = true, virtual_lines = true })
 
 -- <leader>nf: create function from word under cursor
+local function find_sh_insert_line()
+	local lines = vim.fn.getline(1, vim.fn.line("$"))
+
+	-- Insert after explicit marker "# functions" / "# Functions"
+	for i, line in ipairs(lines) do
+		if line:match("^%s*#%s*[Ff]unctions?%s*$") then
+			return i + 1
+		end
+	end
+
+	-- Fallback: skip preamble (shebang, set, shopt, source, ., export, comments, blank lines)
+	local insert_at = 1
+	if #lines >= 1 and lines[1]:match("^#!") then
+		insert_at = 2
+	end
+	for i = insert_at, #lines do
+		local line = lines[i]
+		if line:match("^%s*$") or line:match("^%s*#") or
+			line:match("^%s*set%s+") or line:match("^%s*shopt%s+") or
+			line:match("^%s*source%s+") or line:match("^%s*%.%s+") or
+			line:match("^%s*export%s+") then
+			insert_at = i + 1
+		else
+			break
+		end
+	end
+	return insert_at
+end
+
 vim.keymap.set("n", "<leader>nf", function()
 	local word = vim.fn.expand("<cword>")
 	if word == "" then
@@ -161,24 +190,42 @@ vim.keymap.set("n", "<leader>nf", function()
 	end
 
 	local lines = vim.split(template, "\n")
-	local last_line = vim.fn.line("$")
-	if vim.fn.getline(last_line) ~= "" then
-		vim.fn.append("$", "")
-		last_line = last_line + 1
+	local insert_line
+	if ft == "sh" or ft == "bash" or ft == "zsh" then
+		insert_line = find_sh_insert_line()
+		table.insert(lines, "")
+		local above = insert_line > 1 and vim.fn.getline(insert_line - 1) or ""
+		if above ~= "" then
+			table.insert(lines, 1, "")
+		end
+	else
+		insert_line = vim.fn.line("$")
+		if vim.fn.getline(insert_line) ~= "" then
+			vim.fn.append("$", "")
+			insert_line = insert_line + 1
+		end
 	end
-	vim.fn.append("$", lines)
+	vim.fn.append(insert_line - 1, lines)
 
-	for i, line in ipairs(lines) do
-		if line:match("^%s*$") then
-			local target_row = last_line + i
-			local indent = select(2, line:find("^%s*")) or 0
+	-- Skip leading spacer blank lines, find the first real content line
+	local cursor_start = 1
+	for j = 1, #lines do
+		if lines[j] ~= "" then
+			cursor_start = j
+			break
+		end
+	end
+	for i = cursor_start, #lines do
+		if lines[i]:match("^%s*$") then
+			local target_row = insert_line + i - 1
+			local indent = select(2, lines[i]:find("^%s*")) or 0
 			vim.api.nvim_win_set_cursor(0, { target_row, indent })
 			vim.cmd("startinsert!")
 			return
 		end
 	end
 
-	local last_row = last_line + #lines
+	local last_row = insert_line + #lines - 1
 	vim.api.nvim_win_set_cursor(0, { last_row, 0 })
 	vim.cmd("normal! $")
 	vim.cmd("startinsert!")
