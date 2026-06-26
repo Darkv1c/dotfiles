@@ -4,12 +4,10 @@ return {
     dependencies = {
       "rcarriga/nvim-dap-ui",
       "nvim-neotest/nvim-nio",
-      "theHamsta/nvim-dap-virtual-text",
     },
     config = function()
       local dap = require("dap")
       local dapui = require("dapui")
-      require("nvim-dap-virtual-text").setup()
 
       dapui.setup({
         layouts = {
@@ -52,12 +50,6 @@ return {
       -- Close DAP-UI panels automatically when session ends
       dap.listeners.before.event_terminated["dapui"] = dapui.close
       dap.listeners.before.event_exited["dapui"] = dapui.close
-
-      -- Show virtual values inline while debugging, hide when done
-      local dapvt = require("nvim-dap-virtual-text")
-      dap.listeners.after.event_initialized["dapvt"] = dapvt.enable
-      dap.listeners.before.event_terminated["dapvt"] = dapvt.disable
-      dap.listeners.before.event_exited["dapvt"] = dapvt.disable
 
       -- Bash adapter (bash-debug-adapter from Mason)
       dap.adapters.bash = {
