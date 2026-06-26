@@ -32,13 +32,16 @@ local profile = vim.env.NVIM_PROFILE or "default"
 local profile_imports = {
 	default = {
 		{ import = "plugins.core" },
+		{ import = "plugins.dap" },
 	},
 	study = {
 		{ import = "plugins.core" },
+		{ import = "plugins.dap" },
 		{ import = "plugins.study" },
 	},
 	work = {
 		{ import = "plugins.core" },
+		{ import = "plugins.dap" },
 		{ import = "plugins.work" },
 	},
 }
