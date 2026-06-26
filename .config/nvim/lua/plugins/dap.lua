@@ -47,9 +47,29 @@ return {
       })
       dapui.setup = function() end -- prevent re-init
 
-      -- Close DAP-UI panels automatically when session ends
-      dap.listeners.before.event_terminated["dapui"] = dapui.close
-      dap.listeners.before.event_exited["dapui"] = dapui.close
+      -- Show REPL output when debug session ends
+      dap.listeners.after.event_terminated["dapui"] = function()
+        vim.schedule(function()
+          dap.repl.open({ height = 12 })
+          vim.notify("Debug session terminated", vim.log.levels.INFO)
+        end)
+      end
+      dap.listeners.after.event_exited["dapui"] = function()
+        vim.schedule(function()
+          dap.repl.open({ height = 12 })
+          vim.notify("Debug session exited", vim.log.levels.INFO)
+        end)
+      end
+
+      -- Auto-open REPL on exception break
+      dap.listeners.after.event_stopped["dapui_exception"] = function(_, body)
+        if body.reason == "exception" then
+          vim.schedule(function()
+            dapui.float_element("repl")
+            vim.notify("Debug exception: " .. (body.text or "unknown"), vim.log.levels.WARN)
+          end)
+        end
+      end
 
       -- Auto-open REPL on stderr output (bash errors)
       dap.listeners.after.event_output["bash_stderr"] = function(_, body)
