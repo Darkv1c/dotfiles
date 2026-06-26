@@ -51,6 +51,17 @@ return {
       dap.listeners.before.event_terminated["dapui"] = dapui.close
       dap.listeners.before.event_exited["dapui"] = dapui.close
 
+      -- Auto-open REPL on stderr output (bash errors)
+      dap.listeners.after.event_output["bash_stderr"] = function(_, body)
+        if body.category == "stderr" and body.output and body.output ~= "" then
+          -- Ignore known bashdb init errors (no TTY in debugConsole mode)
+          if body.output:match("/dev/stdin") then return end
+          vim.schedule(function()
+            dapui.float_element("repl")
+          end)
+        end
+      end
+
       -- Bash adapter (bash-debug-adapter from Mason)
       dap.adapters.bash = {
         type = "executable",
@@ -77,7 +88,7 @@ return {
           pathMkfifo = "/usr/bin/mkfifo",
           pathPkill = "/usr/bin/pkill",
           env = vim.empty_dict(),
-          terminalKind = "integrated",
+          terminalKind = "debugConsole",
         },
       }
       -- Same config for .bash extension

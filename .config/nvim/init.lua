@@ -77,8 +77,27 @@ vim.o.scrolloff = 10
 vim.o.list = true
 vim.o.confirm = true
 vim.o.foldmethod = "expr"
-vim.o.foldexpr = "v:lua.vim.treesitter.foldexpr()"
 vim.o.foldlevel = 99 -- Start with all folds open
+
+-- Fold consecutive comment lines (#) + treesitter for code
+vim.g.foldexpr_func = function()
+	local lnum = vim.v.lnum
+	local line = vim.fn.getline(lnum)
+	local prev = lnum > 1 and vim.fn.getline(lnum - 1) or ""
+
+	if line:match("^%s*#") then
+		if not prev:match("^%s*#") then
+			return ">1"
+		end
+		return "1"
+	end
+	if prev:match("^%s*#") then
+		return "<1"
+	end
+
+	return vim.treesitter.foldexpr()
+end
+vim.o.foldexpr = "v:lua.vim.g.foldexpr_func()"
 
 -- Sync clipboard after UIEnter to reduce startup time
 vim.api.nvim_create_autocmd("UIEnter", {
@@ -107,6 +126,63 @@ vim.keymap.set("n", "[d", vim.diagnostic.goto_prev, { desc = "Previous diagnosti
 vim.keymap.set("n", "]d", vim.diagnostic.goto_next, { desc = "Next diagnostic" })
 vim.keymap.set("n", "<leader>q", vim.diagnostic.setloclist, { desc = "Open diagnostic list (loclist)" })
 vim.diagnostic.config({ virtual_text = true, virtual_lines = true })
+
+-- <leader>nf: create function from word under cursor
+vim.keymap.set("n", "<leader>nf", function()
+	local word = vim.fn.expand("<cword>")
+	if word == "" then
+		vim.notify("No word under cursor", vim.log.levels.WARN)
+		return
+	end
+
+	local ft = vim.bo.filetype
+	local template
+
+	if ft == "lua" then
+		template = string.format("function %s()\n\t\nend", word)
+	elseif ft == "python" then
+		template = string.format("def %s():\n\tpass", word)
+	elseif ft == "sh" or ft == "bash" or ft == "zsh" then
+		template = string.format("%s() {\n\t\n}", word)
+	elseif ft:match("javascript") or ft:match("typescript") or ft == "vue" then
+		template = string.format("function %s() {\n\t\n}", word)
+	elseif ft == "go" then
+		template = string.format("func %s() {\n\t\n}", word)
+	elseif ft == "rust" then
+		template = string.format("fn %s() {\n\t\n}", word)
+	elseif ft == "java" then
+		template = string.format("void %s() {\n\t\n}", word)
+	elseif ft == "c" or ft == "cpp" or ft == "cs" then
+		template = string.format("void %s() {\n\t\n}", word)
+	elseif ft == "ruby" then
+		template = string.format("def %s\n\t\nend", word)
+	else
+		template = string.format("%s() {\n\t\n}", word)
+	end
+
+	local lines = vim.split(template, "\n")
+	local last_line = vim.fn.line("$")
+	if vim.fn.getline(last_line) ~= "" then
+		vim.fn.append("$", "")
+		last_line = last_line + 1
+	end
+	vim.fn.append("$", lines)
+
+	for i, line in ipairs(lines) do
+		if line:match("^%s*$") then
+			local target_row = last_line + i
+			local indent = select(2, line:find("^%s*")) or 0
+			vim.api.nvim_win_set_cursor(0, { target_row, indent })
+			vim.cmd("startinsert!")
+			return
+		end
+	end
+
+	local last_row = last_line + #lines
+	vim.api.nvim_win_set_cursor(0, { last_row, 0 })
+	vim.cmd("normal! $")
+	vim.cmd("startinsert!")
+end, { desc = "Create function from word under cursor" })
 
 -- Copilot keymaps (using Ctrl combos to avoid leader conflicts in insert mode)
 vim.keymap.set("i", "<C-j>", "copilot#Accept()", {
