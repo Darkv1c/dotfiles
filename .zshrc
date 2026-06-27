@@ -41,6 +41,11 @@ export EDITOR=nvim
 export VISUAL=nvim
 zstyle ':completion:*' list-colors "${(s.:.)LS_COLORS}"
 zstyle ':completion:*' menu select
+# Config for zsh-vi-mode (before sourcing)
+function zvm_config() {
+  ZVM_VI_SURROUND_BINDKEY=s-prefix
+}
+
 source ~/.config/zsh/zsh-vi-mode/zsh-vi-mode.zsh
 
 # Add yazi to PATH

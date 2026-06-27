@@ -139,7 +139,7 @@ return {
 				end
 			end, mode = { "n", "t" }, desc = "Toggle terminal" },
 			{ "<leader>tf", "<cmd>ToggleTerm direction=float<cr>", desc = "Floating terminal" },
-			{ "<leader>r", function()
+			{ "<leader>tr", function()
 				local file = vim.fn.expand("%:p")
 				if file == "" then return end
 				local shebang = vim.fn.readfile(file, "", 1)[1]

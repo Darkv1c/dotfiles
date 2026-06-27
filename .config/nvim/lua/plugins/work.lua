@@ -5,7 +5,6 @@ return {
 	{
 		"olrtg/nvim-emmet",
 		config = function()
-			require("nvim-emmet").setup()
 			vim.keymap.set({ "n", "v" }, "<leader>xe", require("nvim-emmet").wrap_with_abbreviation)
 		end,
 	}, -- Treesitter parsers for React/Web development

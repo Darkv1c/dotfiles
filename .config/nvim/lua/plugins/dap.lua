@@ -47,18 +47,7 @@ return {
       })
       dapui.setup = function() end -- prevent re-init
 
-      -- Open runInTerminal as a floating window
-      dap.defaults.fallback.terminal_win_opts = {
-        relative = "editor",
-        width = math.floor(vim.o.columns * 0.8),
-        height = math.floor(vim.o.lines * 0.3),
-        row = math.floor(vim.o.lines * 0.6),
-        col = math.floor(vim.o.columns * 0.1),
-        style = "minimal",
-        border = "single",
-      }
-
-      -- Notify when debug session ends (terminal output is already visible)
+      -- Notify when debug session ends
       dap.listeners.after.event_terminated["dapui"] = function()
         vim.schedule(function()
           vim.notify("Debug session terminated", vim.log.levels.INFO)

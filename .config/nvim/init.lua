@@ -33,16 +33,19 @@ local profile_imports = {
 	default = {
 		{ import = "plugins.core" },
 		{ import = "plugins.dap" },
+		{ import = "plugins.surround" },
 	},
 	study = {
 		{ import = "plugins.core" },
 		{ import = "plugins.dap" },
 		{ import = "plugins.study" },
+		{ import = "plugins.surround" },
 	},
 	work = {
 		{ import = "plugins.core" },
 		{ import = "plugins.dap" },
 		{ import = "plugins.work" },
+		{ import = "plugins.surround" },
 	},
 }
 
